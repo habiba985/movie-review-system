@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Review System</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; }
+    header { background: #222; color: white; padding: 16px 24px; }
+    main { max-width: 1000px; margin: 20px auto; padding: 0 16px; }
+    .controls { display: flex; gap: 12px; margin-bottom: 16px; }
+    .controls input { flex: 1; }
+    .controls input, .controls select {
+      padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .card { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+    .card h3 { margin: 0 0 8px; }
+    .meta { color: #666; font-size: 14px; }
+    .rating { color: #d98e04; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <header><h1>Movie Review System</h1></header>
+
+  <main>
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search by movie title...">
+      <select id="genre">
+        <option value="">All genres</option>
+      </select>
+    </div>
+
+    <div id="movies" class="grid"></div>
+  </main>
+
+  <script>
+    const API = 'http://localhost:3000/api';
+    async function loadGenres() {
+      const response = await fetch(`${API}/genres`);
+      const genres = await response.json();
+
+      const select = document.getElementById('genre');
+      genres.forEach(g => {
+        select.innerHTML += `<option value="${g.genre_name}">${g.genre_name}</option>`;
+      });
+    }
+    async function loadMovies() {
+      const search = document.getElementById('search').value;
+      const genre = document.getElementById('genre').value;
+
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (genre) params.append('genre', genre);
+
+      const response = await fetch(`${API}/movies?${params}`);
+      const movies = await response.json();
+
+      const container = document.getElementById('movies');
+      container.innerHTML = '';
+
+      if (movies.length === 0) {
+        container.innerHTML = '<p>No movies found.</p>';
+        return;
+      }
+
+      movies.forEach(movie => {
+        const rating = movie.avg_rating
+          ? '⭐ ' + Number(movie.avg_rating).toFixed(1)
+          : 'No ratings yet';
+
+        container.innerHTML += `
+          <div class="card">
+            <h3>${movie.title} (${movie.release_year})</h3>
+            <p class="meta">
+              Director: ${movie.director}<br>
+              Genre: ${movie.genres}<br>
+              ${movie.duration_min} min
+            </p>
+            <p>${movie.description}</p>
+            <p class="rating">${rating} (${movie.total_reviews} ${movie.total_reviews === 1 ? 'review' : 'reviews'})</p>
+          </div>`;
+      });
+    }
+
+    document.getElementById('search').addEventListener('input', loadMovies);
+    document.getElementById('genre').addEventListener('change', loadMovies);
+
+    loadGenres();
+    loadMovies();
+  </script>
+</body>
+</html>

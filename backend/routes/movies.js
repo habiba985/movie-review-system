@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// প্রতিটা movie-র সাথে যা যা দেখাতে চাই (list ও details দুই জায়গায় লাগে)
 const MOVIE_FIELDS = `
   m.movie_id, m.title, m.release_year, m.duration_min,
   m.description, m.poster_url,
@@ -19,7 +18,6 @@ const MOVIE_FIELDS = `
     WHERE r.movie_id = m.movie_id AND r.status = 'visible') AS total_reviews
 `;
 
-// GET /api/movies?search=inter&genre=Sci-Fi
 router.get('/', async (req, res) => {
   try {
     const { search, genre } = req.query;
@@ -56,7 +54,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/movies/1  → একটা movie
 router.get('/:id', async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -76,7 +73,6 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-// PUT /api/movies/:id → movie edit (admin)
 router.put('/:id', async (req, res) => {
   const { title, release_year, duration_min, description, poster_url, director_id, genre_ids } = req.body;
 
@@ -125,7 +121,6 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/movies/:id → movie মোছা (admin)
 router.delete('/:id', async (req, res) => {
   try {
     const [result] = await db.query(
@@ -143,7 +138,6 @@ router.delete('/:id', async (req, res) => {
   }
 });
 module.exports = router;
-// POST /api/movies → নতুন movie যোগ (admin)
 router.post('/', async (req, res) => {
   const { title, release_year, duration_min, description, poster_url, director_id, genre_ids } = req.body;
 
