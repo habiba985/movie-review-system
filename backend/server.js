@@ -1,3 +1,4 @@
+const path = require('path');
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
@@ -6,6 +7,7 @@ const db = require('./db');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../frontend')));
 app.use('/api/movies', require('./routes/movies'));
 app.use('/api/genres', require('./routes/genres'));
 app.use('/api/directors', require('./routes/directors'));
